@@ -5,12 +5,9 @@ interface LayoutProps {
   orderBook: ReactNode;
   exchange: ReactNode;
   tables: ReactNode;
-  params: Promise<{ [key: string]: string }>;
 }
 
-const Layout = async ({ children, exchange, orderBook, tables, params }: LayoutProps) => {
-  const { pair } = await params;
-
+const Layout = async ({ children, exchange, orderBook, tables }: LayoutProps) => {
   return (
     <div className="space-y-1 p-1">
       <div className="flex flex-row w-full 2xl:grid 2xl:grid-cols-10 gap-1">
