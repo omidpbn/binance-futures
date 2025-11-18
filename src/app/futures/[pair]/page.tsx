@@ -1,6 +1,9 @@
+import TradeInfo from "@/modules/futures/components/organisms/tradeInfo";
+import TradingViewChart from "@/modules/futures/components/organisms/tradingView";
+
 const Page = () => {
   return (
-    <div className="w-full space-y-1">
+    <div className="w-full h-full space-y-1">
       <div className="flex flex-row items-center gap-4 bg-white dark:bg-slate-900 rounded-md px-4 py-2">
         <div className="flex flex-row items-center gap-1 text-xs font-medium">
           <p>BTCUSDT</p>
@@ -19,12 +22,10 @@ const Page = () => {
       </div>
 
       <div className="bg-white dark:bg-slate-900 rounded-md px-4 py-2">
-        <p>trade info</p>
+        <TradeInfo />
       </div>
 
-      <div className="bg-white dark:bg-slate-900 rounded-md px-4 py-2">
-        <p>candle</p>
-      </div>
+      <div className="bg-white dark:bg-slate-900 rounded-md px-4 py-2">candle</div>
     </div>
   );
 };

@@ -21,7 +21,7 @@ const OrderBook = () => {
   const [showBuy, setShowBuy] = useState(true);
   const [midDirection, setMidDirection] = useState<"up" | "down" | null>(null);
   const lastMidRef = useRef(midPrice);
-
+  
   // Detect mid price direction for UI arrow
   useEffect(() => {
     if (midPrice > lastMidRef.current) setMidDirection("up");
@@ -48,21 +48,27 @@ const OrderBook = () => {
       .catch(console.error);
   }, [selectPair, setSnapshot]);
 
-  // Connect WebSocket once per pair
+  // Connect to depth stream (real-time)
   useEffect(() => {
     if (!selectPair) return;
-    connect({ key: selectPair, path: `${selectPair}@depth@100ms`, onMessage: pushDepth });
+    connect({
+      key: selectPair,
+      path: `${selectPair}@depth@100ms`,
+    });
     return () => disconnect(selectPair);
   }, [selectPair]);
 
-  // Process queued messages every 50ms
+  // Process incoming depth updates very fast
   useEffect(() => {
     if (!selectPair) return;
     const interval = setInterval(() => {
       const messages = popMessages(selectPair);
-      messages.forEach(pushDepth);
-      processQueue();
-    }, 500);
+      if (messages.length > 0) {
+        messages.forEach((depth) => pushDepth(depth));
+        processQueue();
+      }
+    }, 500); // 100ms = super smooth real-time updates
+
     return () => clearInterval(interval);
   }, [selectPair, popMessages, pushDepth, processQueue]);
 
@@ -112,7 +118,7 @@ const OrderBook = () => {
           ))}
         </div>
 
-        <p className="flex gap-1 items-center text-lg leading-8 text-red-400">
+        <p className="flex gap-1 items-center text-lg leading-8 text-red-900">
           <span className={midDirection === "up" ? "text-green-900" : midDirection === "down" ? "text-red-900" : ""}>
             {midPrice.toLocaleString("en-US", { maximumFractionDigits: 1 })}
           </span>
