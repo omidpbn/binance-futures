@@ -11,6 +11,7 @@ import { SellAndBuyBoxIcon } from "../../atoms/illustrators/sellAndBuyBoxIcon";
 import { OrderBookAPI } from "@/modules/futures/services/futuresService";
 import { useGenericSockets } from "@/shared/hooks/useGenericSockets";
 import { useOrderBookStore } from "@/modules/futures/store/useOrderBookStore";
+import LoadingSvg from "@/shared/components/atoms/loadingGif";
 
 const OrderBook = () => {
   const { pair } = useParams<{ pair: string }>();
@@ -21,7 +22,7 @@ const OrderBook = () => {
   const [showBuy, setShowBuy] = useState(true);
   const [midDirection, setMidDirection] = useState<"up" | "down" | null>(null);
   const lastMidRef = useRef(midPrice);
-  
+
   // Detect mid price direction for UI arrow
   useEffect(() => {
     if (midPrice > lastMidRef.current) setMidDirection("up");
@@ -72,7 +73,12 @@ const OrderBook = () => {
     return () => clearInterval(interval);
   }, [selectPair, popMessages, pushDepth, processQueue]);
 
-  if (!bids.length && !asks.length) return <div>Loading orderbook...</div>;
+  if (!bids.length && !asks.length)
+    return (
+      <div className="bg-white dark:bg-slate-900 rounded-md py-20">
+        <LoadingSvg />
+      </div>
+    );
 
   const maxRows = showBuy && showSell ? 7 : 14;
   const displayBids = showBuy ? bids.slice(0, maxRows) : [];
@@ -82,7 +88,7 @@ const OrderBook = () => {
 
   return (
     <div className="flex flex-col bg-white dark:bg-slate-900 rounded-md">
-      <div className="flex justify-between items-center border-b border-b-slate-800 px-4 py-2">
+      <div className="flex justify-between items-center border-b border-b-gray-200 dark:border-b-slate-800 px-4 py-2">
         <p className="text-sm font-medium">Order Book</p>
         <HiOutlineDotsHorizontal className="text-gray-700" />
       </div>

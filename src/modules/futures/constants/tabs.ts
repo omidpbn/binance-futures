@@ -13,3 +13,9 @@ export const TRADE_TABS = [
   { value: "0", label: "Trades" },
   { value: "1", label: "Top Movers" },
 ];
+
+export const EXCHANGE_TABS = [
+  { value: "0", label: "Limit" },
+  { value: "1", label: "Market" },
+  { value: "2", label: "StopLimit" },
+];

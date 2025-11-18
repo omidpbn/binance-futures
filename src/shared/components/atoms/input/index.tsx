@@ -1,8 +1,14 @@
 import { FloatingLabel, type FloatingLabelProps } from "flowbite-react";
 import { CustomFlowbiteTheme } from "flowbite-react/types";
+import { ReactNode } from "react";
 
 interface InputProps extends Omit<FloatingLabelProps, "variant"> {
   variant?: FloatingLabelProps["variant"];
+  firstIcon?: ReactNode;
+  secondIcon?: ReactNode;
+  thirdIcon?: ReactNode;
+  onClickThirdIcon?: () => void;
+  thirdIconStyle?: string;
 }
 
 const customTheme: CustomFlowbiteTheme["floatingLabel"] = {
@@ -13,8 +19,8 @@ const customTheme: CustomFlowbiteTheme["floatingLabel"] = {
         md: "peer block w-full appearance-none rounded-t-lg border-0 border-b-2 border-gray-300 bg-gray-50 px-2.5 pb-2.5 pt-5 text-sm text-gray-900 focus:border-primary-600 focus:outline-none focus:ring-0 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-primary-500",
       },
       outlined: {
-        sm: "peer block w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-2.5 pb-2.5 pt-4 text-xs text-gray-900 focus:border-primary-600 focus:outline-none focus:ring-0 dark:border-gray-600 dark:text-white dark:focus:border-primary-500",
-        md: "peer block w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-2.5 pb-2.5 pt-4 text-sm text-gray-900 focus:border-primary-600 focus:outline-none focus:ring-0 dark:border-gray-600 dark:text-white dark:focus:border-primary-500",
+        sm: "peer h-10 py-0 pb-1 rounded-md dark:!text-white text-black block w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-2.5 pb-2.5 pt-4 text-xs text-gray-900 focus:border-primary-600 focus:outline-none focus:ring-0 dark:border-gray-600 dark:text-white dark:focus:border-primary-500",
+        md: "peer h-10 py-0 pb-1 rounded-md dark:!text-white text-black block w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-2.5 pb-2.5 pt-4 text-sm text-gray-900 focus:border-primary-600 focus:outline-none focus:ring-0 dark:border-gray-600 dark:text-white dark:focus:border-primary-500",
       },
       standard: {
         sm: "peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-xs text-gray-900 focus:border-primary-600 focus:outline-none focus:ring-0 dark:border-gray-600 dark:text-white dark:focus:border-primary-500",
@@ -96,8 +102,32 @@ const customTheme: CustomFlowbiteTheme["floatingLabel"] = {
   },
 };
 
-const Input = ({ label, variant = "outlined", ...props }: InputProps) => {
-  return <FloatingLabel theme={customTheme} variant={variant} label={label} {...props} />;
+const Input = ({ label, variant = "outlined", firstIcon, secondIcon, onClickThirdIcon, thirdIcon, thirdIconStyle, ...props }: InputProps) => {
+  return (
+    <div className="relative w-full h-10">
+      {firstIcon && <div className="absolute top-1 bottom-0 my-auto flex items-center justify-center start-4 z-30 w-4 h-4">{firstIcon}</div>}
+      <FloatingLabel
+        theme={customTheme}
+        variant={variant}
+        label={label}
+        className={`${
+          firstIcon
+            ? "peer-placeholder-shown:ps-10 peer-placeholder-shown:start-1 start-4 ps-2 peer-focus:ps-2"
+            : "peer-placeholder-shown:ps-4 peer-focus:ps-4 !ps-4 peer-placeholder-shown:start-1 start-4"
+        } ${secondIcon ? "pe-16" : thirdIcon ? "pe-10" : "pe-4"} `}
+        {...props}
+      />
+      {thirdIcon && (
+        <div
+          className={`absolute top-1 bottom-0 my-auto flex items-center justify-center end-4 z-30 w-4 h-4 ${thirdIconStyle}`}
+          onClick={onClickThirdIcon}
+        >
+          {thirdIcon}
+        </div>
+      )}
+      {secondIcon && <div className={`absolute top-2 bottom-0 my-auto flex items-center justify-center end-10 z-30 w-4 h-4 `}>{secondIcon}</div>}
+    </div>
+  );
 };
 
 export default Input;

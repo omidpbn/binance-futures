@@ -3,7 +3,7 @@ import Button from "@/shared/components/atoms/button";
 const Account = () => {
   return (
     <>
-      <div className="border-b border-slate-800">
+      <div className="border-b border-b-gray-200 dark:border-slate-800">
         <p className="text-sm font-medium px-4 py-2">Account</p>
       </div>
       <div className="px-4 py-2 leading-5">

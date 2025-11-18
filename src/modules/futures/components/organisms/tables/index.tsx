@@ -19,7 +19,7 @@ const Tables = () => {
         ActiveClassName="absolute -bottom-2 left-1/2 w-4 h-[3px] bg-yellow-950 dark:bg-yellow-900 -translate-x-1/2 rounded z-30"
         NotActiveClassName=""
       />
-      <div className="border-t border-t-slate-800 h-full">
+      <div className="border-t border-t-gray-200 dark:border-t-slate-800 h-full">
         {activeTab === "0" && (
           <>
             <div className="text-xs font-normal text-black dark:text-white text-center my-52">

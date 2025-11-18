@@ -1,8 +1,10 @@
+import ExchangeForm from "@/modules/futures/components/organisms/exchangeForm";
+
 const Page = () => {
   return (
-    <div>
-      <p>exchange</p>
-    </div>
+    <>
+      <ExchangeForm />
+    </>
   );
 };
 

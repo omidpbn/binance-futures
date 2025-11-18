@@ -22,7 +22,7 @@ const customTheme: CustomFlowbiteTheme["button"] = {
 
 const Button = ({ children, color, outline, pill, ...props }: ButtonProps) => {
   return (
-    <FlowbiteButton theme={customTheme} color={color} outline={outline} pill={pill} {...props} className="">
+    <FlowbiteButton theme={customTheme} color={color} outline={outline} pill={pill} {...props}>
       {children}
     </FlowbiteButton>
   );

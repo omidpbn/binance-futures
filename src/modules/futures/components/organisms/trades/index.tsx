@@ -15,7 +15,7 @@ const Trades = () => {
 
   return (
     <div className="flex flex-col bg-white dark:bg-slate-900 rounded-md">
-      <div className="flex flex-row items-center justify-between border-b border-b-slate-800 px-4 py-2">
+      <div className="flex flex-row items-center justify-between border-b border-b-gray-200 dark:border-b-slate-800 px-4 py-2">
         <TabSwitcher
           tabs={TRADE_TABS}
           activeTab={activeTab}
