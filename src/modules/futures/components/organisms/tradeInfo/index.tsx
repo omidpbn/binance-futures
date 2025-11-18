@@ -165,15 +165,16 @@ const TradeInfo = () => {
 
   return (
     <div className="flex flex-row items-center justify-start select-none gap-2">
-      <div className="border border-slate-700 rounded-md p-1">
+      <div className="border dark:border-slate-800 rounded-md p-1">
         <FaStar className="w-4 h-4 text-yellow-900" />
       </div>
+
       <Image src={btcImage} alt="" width={24} height={24}></Image>
 
       <div className="flex flex-row items-center gap-1">
         <div className="flex items-center">
           <span className="text-xl font-medium">{symbolUpper}</span>
-          <span className="text-[10px] font-normal bg-slate-800 rounded px-1">Perp</span>
+          <span className="text-[10px] font-normal bg-gray-800 dark:bg-slate-800 rounded px-1">Perp</span>
         </div>
         <IoMdArrowDropdown />
       </div>
@@ -203,12 +204,12 @@ const TradeInfo = () => {
       >
         <p className="text-xs font-normal text-gray-700 min-w-12">
           Mark
-          <span className="block text-white pt-1">{parseFloat(market.markPrice).toLocaleString("en-US", { maximumFractionDigits: 1 })}</span>
+          <span className="block text-black dark:text-white pt-1">{parseFloat(market.markPrice).toLocaleString("en-US", { maximumFractionDigits: 1 })}</span>
         </p>
 
         <p className="text-xs font-normal text-gray-700 min-w-12">
           Index
-          <span className="block text-white pt-1">{parseFloat(market.indexPrice).toLocaleString("en-US", { maximumFractionDigits: 1 })}</span>
+          <span className="block text-black dark:text-white pt-1">{parseFloat(market.indexPrice).toLocaleString("en-US", { maximumFractionDigits: 1 })}</span>
         </p>
 
         <div className="flex flex-col min-w-36">
@@ -226,22 +227,22 @@ const TradeInfo = () => {
 
         <p className="text-xs font-normal text-nowrap text-gray-700 min-w-12">
           24h High
-          <span className="block text-white pt-1">{parseFloat(ticker.high24h).toLocaleString("en-US", { maximumFractionDigits: 1 })}</span>
+          <span className="block text-black dark:text-white pt-1">{parseFloat(ticker.high24h).toLocaleString("en-US", { maximumFractionDigits: 1 })}</span>
         </p>
 
         <p className="text-xs font-normal text-nowrap text-gray-700 min-w-12">
           24h Low
-          <span className="block text-white pt-1">{parseFloat(ticker.low24h).toLocaleString("en-US", { maximumFractionDigits: 1 })}</span>
+          <span className="block text-black dark:text-white pt-1">{parseFloat(ticker.low24h).toLocaleString("en-US", { maximumFractionDigits: 1 })}</span>
         </p>
 
         <p className="text-xs font-normal text-nowrap text-gray-700 min-w-24">
           24h Volume(BTC)
-          <span className="block text-white pt-1">{parseFloat(ticker.volume24h).toLocaleString("en-US", { maximumFractionDigits: 3 })}</span>
+          <span className="block text-black dark:text-white pt-1">{parseFloat(ticker.volume24h).toLocaleString("en-US", { maximumFractionDigits: 3 })}</span>
         </p>
 
         <p className="text-xs font-normal text-nowrap text-gray-700 min-w-28">
           24h Volume(USDT)
-          <span className="block text-white pt-1">{parseFloat(ticker.volume24hUSDT).toLocaleString("en-US", { maximumFractionDigits: 0 })}</span>
+          <span className="block text-black dark:text-white pt-1">{parseFloat(ticker.volume24hUSDT).toLocaleString("en-US", { maximumFractionDigits: 0 })}</span>
         </p>
 
         <div>
@@ -249,7 +250,7 @@ const TradeInfo = () => {
             <span>Open Interest(USDT)</span>
             <IoIosArrowRoundForward className="-rotate-45 w-4 h-4" />
           </p>
-          <span className="text-xs font-normal text-white pt-1">
+          <span className="text-xs font-normal text-black dark:text-white pt-1">
             {parseFloat(market.openInterestUSDT).toLocaleString("en-US", { maximumFractionDigits: 0 })}
           </span>
         </div>
