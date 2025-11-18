@@ -3,7 +3,7 @@
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import TabSwitcher from "../../atoms/tabSwitcher";
-import TradeRow from "../../atoms/tradesRow";
+import TradeRow from "../../molecules/tradesRow";
 import { TRADE_TABS } from "@/modules/futures/constants/tabs";
 import { MonitorWindowIcon } from "../../atoms/illustrators/monitorWindowIcon";
 import { HiOutlineDotsHorizontal } from "react-icons/hi";

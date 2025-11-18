@@ -1,4 +1,4 @@
-interface OrderListProps {
+interface TradeRowProps {
   color?: "green" | "red";
   price: number;
   amount: number;
@@ -6,7 +6,7 @@ interface OrderListProps {
   decimalCount?: number;
 }
 
-const TradeRow = ({ color, price, amount, time, decimalCount = 3 }: OrderListProps) => {
+const TradeRow = ({ color, price, amount, time, decimalCount = 3 }: TradeRowProps) => {
   return (
     <div className="grid grid-cols-3 gap-1 text-[10px] leading-[18px] z-10">
       <p className={color === "green" ? "text-green-900" : "text-red-900"}>

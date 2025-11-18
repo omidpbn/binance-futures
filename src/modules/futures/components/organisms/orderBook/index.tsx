@@ -1,112 +1,130 @@
 "use client";
 
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
-import { useMemo, useState } from "react";
-import { FaCaretDown } from "react-icons/fa";
-import OrderRow from "../../atoms/ordersRow";
+import { FaCaretDown, FaArrowUp, FaArrowDown } from "react-icons/fa";
+import { HiOutlineDotsHorizontal } from "react-icons/hi";
+import OrderRow from "../../molecules/ordersRow";
 import { SellBoxIcon } from "../../atoms/illustrators/sellBoxIcon";
 import { BuyBoxIcon } from "../../atoms/illustrators/buyIcon";
 import { SellAndBuyBoxIcon } from "../../atoms/illustrators/sellAndBuyBoxIcon";
-import { HiOutlineDotsHorizontal } from "react-icons/hi";
+import { OrderBookAPI } from "@/modules/futures/services/futuresService";
+import { useGenericSockets } from "@/shared/hooks/useGenericSockets";
+import { useOrderBookStore } from "@/modules/futures/store/useOrderBookStore";
 
 const OrderBook = () => {
   const { pair } = useParams<{ pair: string }>();
+  const { connect, disconnect, popMessages } = useGenericSockets();
+  const { bids, asks, midPrice, setSnapshot, pushDepth, processQueue } = useOrderBookStore();
+
   const [showSell, setShowSell] = useState(true);
   const [showBuy, setShowBuy] = useState(true);
+  const [midDirection, setMidDirection] = useState<"up" | "down" | null>(null);
+  const lastMidRef = useRef(midPrice);
 
+  // Detect mid price direction for UI arrow
+  useEffect(() => {
+    if (midPrice > lastMidRef.current) setMidDirection("up");
+    else if (midPrice < lastMidRef.current) setMidDirection("down");
+    else setMidDirection(null);
+    lastMidRef.current = midPrice;
+  }, [midPrice]);
+
+  const selectPair = useMemo(() => pair?.replace("-", "").toLowerCase(), [pair]);
   const separatedPair = useMemo(() => pair?.split("-"), [pair]);
-  console.log(separatedPair);
-  const handleShowSellAndBuy = () => {
-    setShowSell(true);
-    setShowBuy(true);
+
+  const handleShow = (sell: boolean, buy: boolean) => {
+    setShowSell(sell);
+    setShowBuy(buy);
   };
 
-  const handleShowSell = () => {
-    setShowSell(true);
-    setShowBuy(false);
-  };
+  // Fetch initial snapshot once
+  useEffect(() => {
+    if (!selectPair) return;
+    OrderBookAPI.getSnapshot(selectPair)
+      .then((res) => {
+        setSnapshot({ U: res.data.lastUpdateId, u: res.data.lastUpdateId, b: res.data.bids, a: res.data.asks });
+      })
+      .catch(console.error);
+  }, [selectPair, setSnapshot]);
 
-  const handleShowBuy = () => {
-    setShowSell(false);
-    setShowBuy(true);
-  };
+  // Connect WebSocket once per pair
+  useEffect(() => {
+    if (!selectPair) return;
+    connect({ key: selectPair, path: `${selectPair}@depth@100ms`, onMessage: pushDepth });
+    return () => disconnect(selectPair);
+  }, [selectPair]);
+
+  // Process queued messages every 50ms
+  useEffect(() => {
+    if (!selectPair) return;
+    const interval = setInterval(() => {
+      const messages = popMessages(selectPair);
+      messages.forEach(pushDepth);
+      processQueue();
+    }, 500);
+    return () => clearInterval(interval);
+  }, [selectPair, popMessages, pushDepth, processQueue]);
+
+  if (!bids.length && !asks.length) return <div>Loading orderbook...</div>;
+
+  const maxRows = showBuy && showSell ? 7 : 14;
+  const displayBids = showBuy ? bids.slice(0, maxRows) : [];
+  const displayAsks = showSell ? asks.slice(0, maxRows) : [];
+  const maxSumBuy = Math.max(...displayBids.map((r) => r.sum), 1);
+  const maxSumSell = Math.max(...displayAsks.map((r) => r.sum), 1);
 
   return (
     <div className="flex flex-col bg-white dark:bg-slate-900 rounded-md">
-      <div className="flex flex-row items-center justify-between border-b border-b-slate-800 px-4 py-2">
+      <div className="flex justify-between items-center border-b border-b-slate-800 px-4 py-2">
         <p className="text-sm font-medium">Order Book</p>
         <HiOutlineDotsHorizontal className="text-gray-700" />
       </div>
 
-      <div className="flex flex-row items-center justify-between px-4 py-2">
-        <div className="flex flex-row items-center justify-start gap-1">
-          <button className={showBuy && showSell ? "opacity-100" : "opacity-50"} onClick={handleShowSellAndBuy}>
+      <div className="flex justify-between items-center px-4 py-2">
+        <div className="flex gap-1">
+          <button className={showBuy && showSell ? "opacity-100" : "opacity-50"} onClick={() => handleShow(true, true)}>
             <SellAndBuyBoxIcon className="w-4 h-4" />
           </button>
-          <button className={showSell && !showBuy ? "opacity-100" : "opacity-50"} onClick={handleShowSell}>
+          <button className={showSell && !showBuy ? "opacity-100" : "opacity-50"} onClick={() => handleShow(true, false)}>
             <BuyBoxIcon className="w-4 h-4" />
           </button>
-          <button className={!showSell && showBuy ? "opacity-100" : "opacity-50"} onClick={handleShowBuy}>
+          <button className={!showSell && showBuy ? "opacity-100" : "opacity-50"} onClick={() => handleShow(false, true)}>
             <SellBoxIcon className="w-4 h-4" />
           </button>
         </div>
-
-        <div className="flex flex-row items-center gap-1 text-[10px] font-medium">
+        <div className="flex gap-1 items-center text-[10px] font-medium">
           <p>0.1</p>
           <FaCaretDown className="text-gray-700" />
         </div>
       </div>
 
-      <div className="h-full flex flex-col justify-between gap-2 px-4">
+      <div className="flex flex-col justify-between gap-2 px-4 h-full">
         <div className="grid grid-cols-3 text-[10px] text-gray-700">
-          <p className="text-start">
-            <span>Price</span>
-            <span>({separatedPair[1].toUpperCase()})</span>
-          </p>
-          <p className="text-center">
-            <span>Size</span>
-            <span>({separatedPair[0].toUpperCase()})</span>
-          </p>
-          <p className="text-end">
-            <span>Sum</span>
-            <span>({separatedPair[0].toUpperCase()})</span>
-          </p>
+          <p className="text-start">Price ({separatedPair?.[1]?.toUpperCase()})</p>
+          <p className="text-center">Size ({separatedPair?.[0]?.toUpperCase()})</p>
+          <p className="text-end">Sum ({separatedPair?.[0]?.toUpperCase()})</p>
         </div>
 
-        {showBuy ? (
-          <div className="w-full h-full flex flex-col">
-            <OrderRow color="red" price={1100000} value={0.00019} totalOrTime={"20951834"} />
-            <OrderRow color="red" price={1100000} value={0.00019} totalOrTime={"20951834"} />
-            <OrderRow color="red" price={1100000} value={0.00019} totalOrTime={"20951834"} />
-            <OrderRow color="red" price={1100000} value={0.00019} totalOrTime={"20951834"} />
-            <OrderRow color="red" price={1100000} value={0.00019} totalOrTime={"20951834"} />
-            <OrderRow color="red" price={1100000} value={0.00019} totalOrTime={"20951834"} />
-            <OrderRow color="red" price={1100000} value={0.00019} totalOrTime={"20951834"} />
-          </div>
-        ) : (
-          ""
-        )}
+        <div className="flex flex-col w-full h-full">
+          {displayAsks.map((row, i) => (
+            <OrderRow key={i} color="red" price={row.price} value={row.qty} totalOrTime={row.sum.toFixed(5)} maxSum={maxSumSell} />
+          ))}
+        </div>
 
-        <p className="flex flex-row text-red-400 justify-start items-center text-lg leading-8">
-          <span>11,019,797,974</span>
-          <span>
-            <FaCaretDown />
+        <p className="flex gap-1 items-center text-lg leading-8 text-red-400">
+          <span className={midDirection === "up" ? "text-green-900" : midDirection === "down" ? "text-red-900" : ""}>
+            {midPrice.toLocaleString("en-US", { maximumFractionDigits: 1 })}
           </span>
+          {midDirection === "up" && <FaArrowUp className="w-3 h-3 text-green-900" />}
+          {midDirection === "down" && <FaArrowDown className="w-3 h-3 text-red-900" />}
         </p>
 
-        {showSell ? (
-          <div className="w-full h-full flex flex-col pb-1">
-            <OrderRow color="green" price={1100000} value={0.00019} totalOrTime={"20951834"} />
-            <OrderRow color="green" price={1100000} value={0.00019} totalOrTime={"20951834"} />
-            <OrderRow color="green" price={1100000} value={0.00019} totalOrTime={"20951834"} />
-            <OrderRow color="green" price={1100000} value={0.00019} totalOrTime={"20951834"} />
-            <OrderRow color="green" price={1100000} value={0.00019} totalOrTime={"20951834"} />
-            <OrderRow color="green" price={1100000} value={0.00019} totalOrTime={"20951834"} />
-            <OrderRow color="green" price={1100000} value={0.00019} totalOrTime={"20951834"} />
-          </div>
-        ) : (
-          ""
-        )}
+        <div className="flex flex-col w-full h-full pb-1.5">
+          {displayBids.map((row, i) => (
+            <OrderRow key={i} color="green" price={row.price} value={row.qty} totalOrTime={row.sum.toFixed(5)} maxSum={maxSumBuy} />
+          ))}
+        </div>
       </div>
     </div>
   );
