@@ -3,9 +3,9 @@ import TradingViewChart from "@/modules/futures/components/organisms/tradingView
 
 const Page = () => {
   const lineData = [
-    { time: "1699814400", value: 100 },
-    { time: "1699900800", value: 105 },
-    { time: "1699987200", value: 102 },
+    { time: 1699814400, value: 100 },
+    { time: 1699900800, value: 105 },
+    { time: 1699987200, value: 102 },
   ];
 
   return (

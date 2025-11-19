@@ -15,7 +15,7 @@ import { ChartStyleIcon } from "../../atoms/illustrators/chartStyleIcon";
 import { FastOrderIcon } from "../../atoms/illustrators/fastOrderIcon";
 
 interface TradingViewProps {
-  data: { time: string; value: number }[];
+  data: { time: number; value: number }[];
   height?: number;
 }
 
@@ -42,7 +42,12 @@ const TradingView = ({ data, height = 400 }: TradingViewProps) => {
       lineStyle: LineStyle.Solid,
     });
 
-    lineSeries.setData(data);
+    const formattedData = data.map((d) => ({
+      time: new Date(d.time * 1000).toISOString().slice(0, 10),
+      value: d.value,
+    }));
+
+    lineSeries.setData(formattedData);
 
     const handleResize = () => {
       chart.applyOptions({ width: chartContainerRef.current!.clientWidth });
