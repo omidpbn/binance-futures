@@ -11,6 +11,9 @@ import { HiOutlineDotsHorizontal } from "react-icons/hi";
 import { IoMdArrowDropdown, IoIosArrowRoundForward } from "react-icons/io";
 import { MdArrowBackIosNew, MdArrowForwardIos } from "react-icons/md";
 import { FaStar } from "react-icons/fa";
+import { BinanceTicker, MarketData, TickerData } from "@/modules/futures/types/tradeInfo";
+
+
 
 const TradeInfo = () => {
   const { pair } = useParams<{ pair: string }>();
@@ -46,8 +49,9 @@ const TradeInfo = () => {
   const [canScrollRight, setCanScrollRight] = useState(false);
 
   const checkScrollButtons = () => {
-    if (!scrollRef.current) return;
-    const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+    const ref = scrollRef.current;
+    if (!ref) return;
+    const { scrollLeft, scrollWidth, clientWidth } = ref;
     const tolerance = 1;
     setCanScrollLeft(scrollLeft > tolerance);
     setCanScrollRight(scrollLeft + clientWidth < scrollWidth - tolerance);
@@ -61,37 +65,47 @@ const TradeInfo = () => {
   };
 
   useEffect(() => {
-    connect({ key: wsKey, path: `${symbol}@ticker` });
-
-    let lastTicker: TickerData | null = null;
-
-    const interval = setInterval(() => {
-      for (const data of popMessages(wsKey)) {
-        if (data.e !== "24hrTicker") continue;
-
+    connect<BinanceTicker>({
+      key: wsKey,
+      path: `${symbol}@ticker`,
+      onMessage: (data) => {
         const current = parseFloat(data.c);
-
         if (prevMidPrice.current > 0) {
           const newDirection = current > prevMidPrice.current ? "up" : current < prevMidPrice.current ? "down" : null;
           setDirection((prev) => (prev !== newDirection ? newDirection : prev));
         }
-
         prevMidPrice.current = current;
 
-        const updated: TickerData = {
-          priceChange: data.p || "0",
-          changePercent: data.P || "0",
-          high24h: data.h || "0",
-          low24h: data.l || "0",
-          volume24h: data.v || "0",
-          volume24hUSDT: data.q || "0",
-        };
+        setTicker({
+          priceChange: data.p,
+          changePercent: data.P,
+          high24h: data.h,
+          low24h: data.l,
+          volume24h: data.v,
+          volume24hUSDT: data.q,
+        });
+      },
+    });
 
-        if (JSON.stringify(lastTicker) !== JSON.stringify(updated)) {
-          lastTicker = updated;
-          setTicker(updated);
+    const interval = setInterval(() => {
+      const messages = popMessages<BinanceTicker>(wsKey);
+      messages.forEach((data) => {
+        const current = parseFloat(data.c);
+        if (prevMidPrice.current > 0) {
+          const newDirection = current > prevMidPrice.current ? "up" : current < prevMidPrice.current ? "down" : null;
+          setDirection((prev) => (prev !== newDirection ? newDirection : prev));
         }
-      }
+        prevMidPrice.current = current;
+
+        setTicker({
+          priceChange: data.p,
+          changePercent: data.P,
+          high24h: data.h,
+          low24h: data.l,
+          volume24h: data.v,
+          volume24hUSDT: data.q,
+        });
+      });
     }, 100);
 
     return () => {
@@ -102,8 +116,6 @@ const TradeInfo = () => {
 
   useEffect(() => {
     let lastMarket: MarketData | null = null;
-    let intervalId: NodeJS.Timeout;
-
     const updateMarketData = async () => {
       try {
         const [premium, oiData] = await Promise.all([TradeInfoAPI.getPremiumIndex(symbolUpper), TradeInfoAPI.getOpenInterest(symbolUpper)]);
@@ -125,12 +137,12 @@ const TradeInfo = () => {
           setMarket(updatedMarket);
         }
       } catch (err) {
-        console.error("Failed to update market data:", err);
+        console.error(err);
       }
     };
 
     updateMarketData();
-    intervalId = setInterval(updateMarketData, 2000);
+    const intervalId = setInterval(updateMarketData, 2000);
 
     return () => clearInterval(intervalId);
   }, [symbolUpper]);
@@ -138,7 +150,6 @@ const TradeInfo = () => {
   useEffect(() => {
     const ref = scrollRef.current;
     if (!ref) return;
-
     const handleScroll = () => checkScrollButtons();
     const handleResize = () => checkScrollButtons();
 
@@ -169,7 +180,7 @@ const TradeInfo = () => {
         <FaStar className="w-4 h-4 text-yellow-900" />
       </div>
 
-      <Image src={btcImage} alt="" width={24} height={24}></Image>
+      <Image src={btcImage} alt="" width={24} height={24} />
 
       <div className="flex flex-row items-center gap-1">
         <div className="flex items-center">
@@ -181,10 +192,7 @@ const TradeInfo = () => {
 
       <div className="min-w-24 flex flex-col me-1">
         <span className={`text-xl font-bold ${direction === "up" ? "text-green-500" : "text-red-500"}`}>
-          {midPrice.toLocaleString("en-US", {
-            minimumFractionDigits: 1,
-            maximumFractionDigits: 1,
-          })}
+          {midPrice.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
         </span>
         <div className={`flex flex-row items-center gap-2 text-xs font-normal ${isNegative ? "text-red-500" : "text-green-500"}`}>
           <span>{parseFloat(ticker.priceChange).toLocaleString("en-US", { maximumFractionDigits: 2 })}</span>
@@ -202,51 +210,53 @@ const TradeInfo = () => {
         className="flex flex-row items-center gap-4 overflow-x-auto scrollbar-hide"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
-        <p className="text-xs font-normal text-gray-700 min-w-12">
+        <p className="text-xs font-normal text-gray-700 min-w-12 text-nowrap">
           Mark
-          <span className="block text-black dark:text-white pt-1">{parseFloat(market.markPrice).toLocaleString("en-US", { maximumFractionDigits: 1 })}</span>
+          <span className="block text-black dark:text-white pt-1">
+            {parseFloat(market.markPrice).toLocaleString("en-US", { maximumFractionDigits: 1 })}
+          </span>
         </p>
-
-        <p className="text-xs font-normal text-gray-700 min-w-12">
+        <p className="text-xs font-normal text-gray-700 min-w-12 text-nowrap">
           Index
-          <span className="block text-black dark:text-white pt-1">{parseFloat(market.indexPrice).toLocaleString("en-US", { maximumFractionDigits: 1 })}</span>
+          <span className="block text-black dark:text-white pt-1">
+            {parseFloat(market.indexPrice).toLocaleString("en-US", { maximumFractionDigits: 1 })}
+          </span>
         </p>
-
-        <div className="flex flex-col min-w-36">
-          <p className="text-xs font-normal text-nowrap text-gray-700 pb-1">Funding (8h) / Countdown</p>
+        <div className="flex flex-col min-w-36 text-nowrap">
+          <p className="text-xs font-normal text-gray-700 pb-1">Funding (8h) / Countdown</p>
           <p className="flex flex-row items-center gap-1">
-            <span className="text-xs font-normal text-nowrap text-orange-500">
-              {(parseFloat(market.fundingRate) * 100).toLocaleString("en-US", {
-                maximumFractionDigits: 5,
-              })}
-              % /
+            <span className="text-xs font-normal text-orange-500">
+              {(parseFloat(market.fundingRate) * 100).toLocaleString("en-US", { maximumFractionDigits: 5 })} % /
             </span>
             <span className="text-xs font-normal text-black dark:text-white">{fundingCountdown}</span>
           </p>
         </div>
-
-        <p className="text-xs font-normal text-nowrap text-gray-700 min-w-12">
+        <p className="text-xs font-normal text-gray-700 min-w-12 text-nowrap">
           24h High
-          <span className="block text-black dark:text-white pt-1">{parseFloat(ticker.high24h).toLocaleString("en-US", { maximumFractionDigits: 1 })}</span>
+          <span className="block text-black dark:text-white pt-1">
+            {parseFloat(ticker.high24h).toLocaleString("en-US", { maximumFractionDigits: 1 })}
+          </span>
         </p>
-
-        <p className="text-xs font-normal text-nowrap text-gray-700 min-w-12">
+        <p className="text-xs font-normal text-gray-700 min-w-12 text-nowrap">
           24h Low
-          <span className="block text-black dark:text-white pt-1">{parseFloat(ticker.low24h).toLocaleString("en-US", { maximumFractionDigits: 1 })}</span>
+          <span className="block text-black dark:text-white pt-1">
+            {parseFloat(ticker.low24h).toLocaleString("en-US", { maximumFractionDigits: 1 })}
+          </span>
         </p>
-
-        <p className="text-xs font-normal text-nowrap text-gray-700 min-w-24">
+        <p className="text-xs font-normal text-gray-700 min-w-24 text-nowrap">
           24h Volume(BTC)
-          <span className="block text-black dark:text-white pt-1">{parseFloat(ticker.volume24h).toLocaleString("en-US", { maximumFractionDigits: 3 })}</span>
+          <span className="block text-black dark:text-white pt-1">
+            {parseFloat(ticker.volume24h).toLocaleString("en-US", { maximumFractionDigits: 3 })}
+          </span>
         </p>
-
-        <p className="text-xs font-normal text-nowrap text-gray-700 min-w-28">
+        <p className="text-xs font-normal text-gray-700 min-w-28 text-nowrap">
           24h Volume(USDT)
-          <span className="block text-black dark:text-white pt-1">{parseFloat(ticker.volume24hUSDT).toLocaleString("en-US", { maximumFractionDigits: 0 })}</span>
+          <span className="block text-black dark:text-white pt-1">
+            {parseFloat(ticker.volume24hUSDT).toLocaleString("en-US", { maximumFractionDigits: 0 })}
+          </span>
         </p>
-
-        <div>
-          <p className="text-xs font-normal text-nowrap text-gray-700 min-w-28 flex items-start">
+        <div className="text-nowrap">
+          <p className="text-xs font-normal text-gray-700 min-w-28 flex items-start">
             <span>Open Interest(USDT)</span>
             <IoIosArrowRoundForward className="-rotate-45 w-4 h-4" />
           </p>

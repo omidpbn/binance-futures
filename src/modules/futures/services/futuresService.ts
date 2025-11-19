@@ -1,4 +1,6 @@
 import { WebService } from "@/shared/services/webService";
+import { BinanceOrderBookSnapshot } from "../types/orderBook";
+import { OpenInterestResponse, PremiumIndexResponse } from "../types/tradeInfo";
 
 export class OrderBookAPI {
   static async getSnapshot(pair: string) {

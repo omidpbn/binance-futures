@@ -12,6 +12,7 @@ import { OrderBookAPI } from "@/modules/futures/services/futuresService";
 import { useGenericSockets } from "@/shared/hooks/useGenericSockets";
 import { useOrderBookStore } from "@/modules/futures/store/useOrderBookStore";
 import LoadingSvg from "@/shared/components/atoms/loadingGif";
+import { BinanceDepthUpdate } from "@/modules/futures/types/orderBook";
 
 const OrderBook = () => {
   const { pair } = useParams<{ pair: string }>();
@@ -23,14 +24,6 @@ const OrderBook = () => {
   const [midDirection, setMidDirection] = useState<"up" | "down" | null>(null);
   const lastMidRef = useRef(midPrice);
 
-  // Detect mid price direction for UI arrow
-  useEffect(() => {
-    if (midPrice > lastMidRef.current) setMidDirection("up");
-    else if (midPrice < lastMidRef.current) setMidDirection("down");
-    else setMidDirection(null);
-    lastMidRef.current = midPrice;
-  }, [midPrice]);
-
   const selectPair = useMemo(() => pair?.replace("-", "").toLowerCase(), [pair]);
   const separatedPair = useMemo(() => pair?.split("-"), [pair]);
 
@@ -39,7 +32,15 @@ const OrderBook = () => {
     setShowBuy(buy);
   };
 
-  // Fetch initial snapshot once
+  // Detect mid price direction
+  useEffect(() => {
+    if (midPrice > lastMidRef.current) setMidDirection("up");
+    else if (midPrice < lastMidRef.current) setMidDirection("down");
+    else setMidDirection(null);
+    lastMidRef.current = midPrice;
+  }, [midPrice]);
+
+  // Fetch initial snapshot
   useEffect(() => {
     if (!selectPair) return;
     OrderBookAPI.getSnapshot(selectPair)
@@ -49,26 +50,30 @@ const OrderBook = () => {
       .catch(console.error);
   }, [selectPair, setSnapshot]);
 
-  // Connect to depth stream (real-time)
+  // Connect to WebSocket
   useEffect(() => {
     if (!selectPair) return;
-    connect({
+
+    connect<BinanceDepthUpdate>({
       key: selectPair,
       path: `${selectPair}@depth@100ms`,
     });
+
     return () => disconnect(selectPair);
   }, [selectPair]);
 
-  // Process incoming depth updates very fast
+  // Process messages in batches
   useEffect(() => {
     if (!selectPair) return;
     const interval = setInterval(() => {
-      const messages = popMessages(selectPair);
+      const messages = popMessages<BinanceDepthUpdate>(selectPair);
       if (messages.length > 0) {
-        messages.forEach((depth) => pushDepth(depth));
+        // Process only the latest N messages to avoid blocking UI
+        const latestMessages = messages.slice(-20);
+        latestMessages.forEach((depth) => pushDepth(depth));
         processQueue();
       }
-    }, 500); // 100ms = super smooth real-time updates
+    }, 200); // batch every 200ms for smooth UI
 
     return () => clearInterval(interval);
   }, [selectPair, popMessages, pushDepth, processQueue]);

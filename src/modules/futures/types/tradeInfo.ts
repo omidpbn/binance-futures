@@ -1,4 +1,4 @@
-interface PremiumIndexResponse {
+export interface PremiumIndexResponse {
   symbol: string;
   markPrice: string;
   indexPrice: string;
@@ -6,11 +6,11 @@ interface PremiumIndexResponse {
   nextFundingTime: number;
 }
 
-interface OpenInterestResponse {
+export interface OpenInterestResponse {
   openInterest: string;
 }
 
-interface TickerData {
+export interface TickerData {
   priceChange: string;
   changePercent: string;
   high24h: string;
@@ -19,10 +19,21 @@ interface TickerData {
   volume24hUSDT: string;
 }
 
-interface MarketData {
+export interface MarketData {
   markPrice: string;
   indexPrice: string;
   fundingRate: string;
   nextFundingTime: number;
   openInterestUSDT: string;
+}
+
+export interface BinanceTicker {
+  e: string;
+  c: string;
+  p: string;
+  P: string;
+  h: string;
+  l: string;
+  v: string;
+  q: string;
 }

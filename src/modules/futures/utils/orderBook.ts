@@ -1,3 +1,5 @@
+import { OrderRowType } from "../types/orderBook";
+
 export const mapOrders = (orders: [string, string][]) => orders.map(([p, q]) => ({ price: Number(p), qty: Number(q), sum: 0 }));
 
 export const calcSum = (list: OrderRowType[], isBids: boolean) => {

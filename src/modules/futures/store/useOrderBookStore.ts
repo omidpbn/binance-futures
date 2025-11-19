@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { calcSum, mapOrders } from "../utils/orderBook";
+import { BinanceDepth, OrderRowType } from "../types/orderBook";
 
 interface OrderBookState {
   bids: OrderRowType[];
