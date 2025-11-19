@@ -1,5 +1,9 @@
 # binance-futures
 
+.env =====> NEXT_PUBLIC_API_BASE_URL="https://fapi.binance.com"
+            NEXT_PUBLIC_BASE_WS_URL="wss://fstream.binance.com"
+
+
 src/
  ├─ app/                         → Application pages and route-based components
  │   └─ futures/
