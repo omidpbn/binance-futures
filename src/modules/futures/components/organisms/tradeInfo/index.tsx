@@ -207,7 +207,7 @@ const TradeInfo = () => {
           onClick={() => scroll("left")}
         />
 
-        <div className="max-w-[500px]">
+        <div className="max-w-[470px]">
           <div
             ref={scrollRef}
             className="flex flex-row items-center gap-4 overflow-x-auto scrollbar-hide"
