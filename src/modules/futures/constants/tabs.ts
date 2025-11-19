@@ -19,3 +19,9 @@ export const EXCHANGE_TABS = [
   { value: "1", label: "Market" },
   { value: "2", label: "StopLimit" },
 ];
+
+export const CHART_TABS = [
+  { value: "0", label: "Chart" },
+  { value: "1", label: "Info" },
+  { value: "2", label: "Trading Data" },
+];
