@@ -1,5 +1,5 @@
-import ChartTabs from "@/modules/futures/components/organisms/charts/ChartTabs";
 import TradeInfo from "@/modules/futures/components/organisms/tradeInfo";
+import TradingChart from "@/modules/futures/components/organisms/tradingChart";
 
 const Page = () => {
   return (
@@ -26,7 +26,7 @@ const Page = () => {
       </div>
 
       <div className="relative h-[461px] bg-white !rounded-md dark:!bg-slate-900">
-        <ChartTabs />
+        <TradingChart />
       </div>
     </div>
   );
