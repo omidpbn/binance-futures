@@ -13,7 +13,6 @@ import { MdArrowBackIosNew, MdArrowForwardIos } from "react-icons/md";
 import { FaStar } from "react-icons/fa";
 import { BinanceTicker, MarketData, TickerData } from "@/modules/futures/types/tradeInfo";
 
-
 const TradeInfo = () => {
   const { pair } = useParams<{ pair: string }>();
   const { connect, disconnect, popMessages } = useGenericSockets();
@@ -174,8 +173,8 @@ const TradeInfo = () => {
   const isNegative = parseFloat(ticker.changePercent) < 0;
 
   return (
-    <div className="flex flex-row items-center justify-between select-none gap-2">
-      <div className="flex flex-row items-center gap-2">
+    <div className="w-full flex flex-row items-center gap-2 select-none">
+      <div className=" flex flex-row items-center gap-2">
         <div className="border dark:border-slate-800 rounded-md p-1">
           <FaStar className="w-4 h-4 text-yellow-900" />
         </div>
@@ -189,94 +188,89 @@ const TradeInfo = () => {
           </div>
           <IoMdArrowDropdown />
         </div>
-
-        <div className="min-w-24 flex flex-col me-1">
-          <span className={`text-xl font-bold ${direction === "up" ? "text-green-500" : "text-red-500"}`}>
-            {midPrice.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
-          </span>
-          <div className={`flex flex-row items-center gap-2 text-xs font-normal ${isNegative ? "text-red-500" : "text-green-500"}`}>
-            <span>{parseFloat(ticker.priceChange).toLocaleString("en-US", { maximumFractionDigits: 2 })}</span>
-            <span>{parseFloat(ticker.changePercent).toLocaleString("en-US", { maximumFractionDigits: 2 })}%</span>
-          </div>
-        </div>
-
-        <MdArrowBackIosNew
-          className={`text-gray-700 transition-opacity duration-200 ${
-            canScrollLeft ? "opacity-100 cursor-pointer" : "opacity-0 pointer-events-none"
-          }`}
-          onClick={() => scroll("left")}
-        />
-
-        <div className="max-w-[470px]">
-          <div
-            ref={scrollRef}
-            className="flex flex-row items-center gap-4 overflow-x-auto scrollbar-hide"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-          >
-            <p className="text-xs font-normal text-gray-700 min-w-12 text-nowrap">
-              Mark
-              <span className="block text-black dark:text-white pt-1">
-                {parseFloat(market.markPrice).toLocaleString("en-US", { maximumFractionDigits: 1 })}
-              </span>
-            </p>
-            <p className="text-xs font-normal text-gray-700 min-w-12 text-nowrap">
-              Index
-              <span className="block text-black dark:text-white pt-1">
-                {parseFloat(market.indexPrice).toLocaleString("en-US", { maximumFractionDigits: 1 })}
-              </span>
-            </p>
-            <div className="flex flex-col min-w-36 text-nowrap">
-              <p className="text-xs font-normal text-gray-700 pb-1">Funding (8h) / Countdown</p>
-              <p className="flex flex-row items-center gap-1">
-                <span className="text-xs font-normal text-orange-500">
-                  {(parseFloat(market.fundingRate) * 100).toLocaleString("en-US", { maximumFractionDigits: 5 })} % /
-                </span>
-                <span className="text-xs font-normal text-black dark:text-white">{fundingCountdown}</span>
-              </p>
-            </div>
-            <p className="text-xs font-normal text-gray-700 min-w-12 text-nowrap">
-              24h High
-              <span className="block text-black dark:text-white pt-1">
-                {parseFloat(ticker.high24h).toLocaleString("en-US", { maximumFractionDigits: 1 })}
-              </span>
-            </p>
-            <p className="text-xs font-normal text-gray-700 min-w-12 text-nowrap">
-              24h Low
-              <span className="block text-black dark:text-white pt-1">
-                {parseFloat(ticker.low24h).toLocaleString("en-US", { maximumFractionDigits: 1 })}
-              </span>
-            </p>
-            <p className="text-xs font-normal text-gray-700 min-w-24 text-nowrap">
-              24h Volume(BTC)
-              <span className="block text-black dark:text-white pt-1">
-                {parseFloat(ticker.volume24h).toLocaleString("en-US", { maximumFractionDigits: 3 })}
-              </span>
-            </p>
-            <p className="text-xs font-normal text-gray-700 min-w-28 text-nowrap">
-              24h Volume(USDT)
-              <span className="block text-black dark:text-white pt-1">
-                {parseFloat(ticker.volume24hUSDT).toLocaleString("en-US", { maximumFractionDigits: 0 })}
-              </span>
-            </p>
-            <div className="text-nowrap">
-              <p className="text-xs font-normal text-gray-700 min-w-28 flex items-start">
-                <span>Open Interest(USDT)</span>
-                <IoIosArrowRoundForward className="-rotate-45 w-4 h-4" />
-              </p>
-              <span className="text-xs font-normal text-black dark:text-white pt-1">
-                {parseFloat(market.openInterestUSDT).toLocaleString("en-US", { maximumFractionDigits: 0 })}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <MdArrowForwardIos
-          className={`text-gray-700 transition-opacity duration-200 ${
-            canScrollRight ? "opacity-100 cursor-pointer" : "opacity-0 pointer-events-none"
-          }`}
-          onClick={() => scroll("right")}
-        />
       </div>
+
+      <div className="w-[160px] flex flex-col me-9">
+        <span className={`text-xl font-bold ${direction === "up" ? "text-green-500" : "text-red-500"}`}>
+          {midPrice.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
+        </span>
+        <div className={`flex flex-row items-center gap-2 text-xs font-normal ${isNegative ? "text-red-500" : "text-green-500"}`}>
+          <span>{parseFloat(ticker.priceChange).toLocaleString("en-US", { maximumFractionDigits: 2 })}</span>
+          <span>{parseFloat(ticker.changePercent).toLocaleString("en-US", { maximumFractionDigits: 2 })}%</span>
+        </div>
+      </div>
+
+      <MdArrowBackIosNew
+        className={`text-gray-700 transition-opacity duration-200 ${canScrollLeft ? "opacity-100 cursor-pointer" : "opacity-0 pointer-events-none"}`}
+        onClick={() => scroll("left")}
+      />
+
+      <div
+        ref={scrollRef}
+        className="w-full flex flex-row items-center gap-4 overflow-x-auto scrollbar-hide"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      >
+        <p className="text-xs font-normal text-gray-700 min-w-12 text-nowrap">
+          Mark
+          <span className="block text-black dark:text-white pt-1">
+            {parseFloat(market.markPrice).toLocaleString("en-US", { maximumFractionDigits: 1 })}
+          </span>
+        </p>
+        <p className="text-xs font-normal text-gray-700 min-w-12 text-nowrap">
+          Index
+          <span className="block text-black dark:text-white pt-1">
+            {parseFloat(market.indexPrice).toLocaleString("en-US", { maximumFractionDigits: 1 })}
+          </span>
+        </p>
+        <div className="flex flex-col min-w-36 text-nowrap">
+          <p className="text-xs font-normal text-gray-700 pb-1">Funding (8h) / Countdown</p>
+          <p className="flex flex-row items-center gap-1">
+            <span className="text-xs font-normal text-orange-500">
+              {(parseFloat(market.fundingRate) * 100).toLocaleString("en-US", { maximumFractionDigits: 5 })} % /
+            </span>
+            <span className="text-xs font-normal text-black dark:text-white">{fundingCountdown}</span>
+          </p>
+        </div>
+        <p className="text-xs font-normal text-gray-700 min-w-12 text-nowrap">
+          24h High
+          <span className="block text-black dark:text-white pt-1">
+            {parseFloat(ticker.high24h).toLocaleString("en-US", { maximumFractionDigits: 1 })}
+          </span>
+        </p>
+        <p className="text-xs font-normal text-gray-700 min-w-12 text-nowrap">
+          24h Low
+          <span className="block text-black dark:text-white pt-1">
+            {parseFloat(ticker.low24h).toLocaleString("en-US", { maximumFractionDigits: 1 })}
+          </span>
+        </p>
+        <p className="text-xs font-normal text-gray-700 min-w-24 text-nowrap">
+          24h Volume(BTC)
+          <span className="block text-black dark:text-white pt-1">
+            {parseFloat(ticker.volume24h).toLocaleString("en-US", { maximumFractionDigits: 3 })}
+          </span>
+        </p>
+        <p className="text-xs font-normal text-gray-700 min-w-28 text-nowrap">
+          24h Volume(USDT)
+          <span className="block text-black dark:text-white pt-1">
+            {parseFloat(ticker.volume24hUSDT).toLocaleString("en-US", { maximumFractionDigits: 0 })}
+          </span>
+        </p>
+        <div className="text-nowrap">
+          <p className="text-xs font-normal text-gray-700 min-w-28 flex items-start">
+            <span>Open Interest(USDT)</span>
+            <IoIosArrowRoundForward className="-rotate-45 w-4 h-4" />
+          </p>
+          <span className="text-xs font-normal text-black dark:text-white pt-1">
+            {parseFloat(market.openInterestUSDT).toLocaleString("en-US", { maximumFractionDigits: 0 })}
+          </span>
+        </div>
+      </div>
+      
+      <MdArrowForwardIos
+        className={`text-gray-700 transition-opacity duration-200 ${canScrollRight ? "opacity-100 cursor-pointer" : "opacity-0 pointer-events-none"}`}
+        onClick={() => scroll("right")}
+      />
+
       <HiOutlineDotsHorizontal className="text-gray-700" />
     </div>
   );
